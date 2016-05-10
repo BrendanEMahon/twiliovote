@@ -72,11 +72,12 @@ app.post('/_sms', function(req, res) {
       var f = req.body.From;
       var b = req.body.Body;
 
-      client.sadd('voters', f, function(_, didNotVote){
-        if(didNotVote === 1) {
+      client.sismember('voters', f, function(_, voted){
+        if(voted === 1) {
           var team = b.toLowerCase().trim();
           client.sismember('teams', team, function(_, validTeam){
             if(validTeam === 1) {
+              client.sadd('voters', f);
               client.hincrby('votes', team, 1, function(_, __) {
                 smsResponse(res, "Your vote has been recorded!");
                 updateClients();
