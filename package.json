@@ -1,0 +1,20 @@
+{
+  "name": "twiliovote",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "express": "^4.13.4",
+    "redis": "^2.6.0-2",
+    "socket.io": "^1.4.6",
+    "twilio": "^2.9.1",
+    "bluebird": "^3.3.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "UNLICENSED"
+}
