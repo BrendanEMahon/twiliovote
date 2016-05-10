@@ -73,7 +73,7 @@ app.post('/_sms', function(req, res) {
       var b = req.body.Body;
 
       client.sismember('voters', f, function(_, voted){
-        if(voted === 1) {
+        if(voted !== 1) {
           var team = b.toLowerCase().trim();
           client.sismember('teams', team, function(_, validTeam){
             if(validTeam === 1) {
