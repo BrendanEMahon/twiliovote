@@ -3,16 +3,18 @@ var express = require('express'),
     twilio = require('twilio'),
     redis = require('redis'),
     Promise = require('bluebird'),
-    http = require('http'),
-    config = require('./config.js');
+    http = require('http');
+
+var PORT = 8080,
+    AUTH_TOKEN = process.env.AUTH_TOKEN,
+    REDIS_URL = process.env.REDIS_URL;
 
 var app = express();
 var server = http.createServer(app);
 var io = require('socket.io')(server);
 
 Promise.promisifyAll(redis.RedisClient.prototype);
-
-var client = redis.createClient();
+var client = redis.createClient("//cache");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static('public'));
@@ -36,6 +38,27 @@ function updateClients() {
   });
 }
 
+app.get('/_teams', function(req, res){
+  client.smembersAsync('teams').then(function(teams) {
+    res.json(teams);
+  });
+});
+
+app.post('/_teams', function(req, res){
+  client.saddAsync('teams', req.body.name).then(function(_) {
+    client.smembersAsync('teams').then(function(teams) {
+      res.json(teams);
+    });
+  });
+});
+
+app.delete('/_teams', function(req, res){
+  client.sremAsync('teams', req.body.name).then(function(_) {
+    client.smembersAsync('teams').then(function(teams) {
+      res.json(teams);
+    });
+  });
+});
 
 app.post('/_api', function(req, res){
   var action = req.body.action;
@@ -62,7 +85,7 @@ app.post('/_api', function(req, res){
 });
 
 app.post('/_sms', function(req, res) {
-  if (twilio.validateExpressRequest(req, config.authToken)) {
+  if (twilio.validateExpressRequest(req, AUTH_TOKEN)) {
     client.get('open', function(_, pollOpen) {
       if(pollOpen !== "1") {
         smsResponse(res, null);
@@ -107,4 +130,4 @@ io.on('connection', function(socket) {
   });
 });
 
-server.listen(3000);
+server.listen(PORT);

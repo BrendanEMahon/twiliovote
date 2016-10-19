@@ -1,0 +1,14 @@
+version: '2'
+services:
+  cache:
+    image: redis
+    restart: always
+  app:
+    build: twiliovote
+    ports:
+      - "8080:8080"
+    depends_on:
+      - cache
+    env_file:
+      - ./app.env
+    restart: always

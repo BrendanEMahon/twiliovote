@@ -29,11 +29,37 @@
     </table>
   </script>
 
+  <script id="teams-template" type="text/x-handlebars-template">
+    <table>
+      <thead>
+        <th>
+          Name
+        </th>
+        <th>
+          Delete
+        </th>
+      </thead>
+      <tbody>
+        {{#each teams}}
+        <tr>
+          <td>
+            {{this}}
+          </td>
+          <td>
+	    <a href="#" class="delete-team" data-team-name="{{this}}">Delete</a>
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </script>
   <script type="text/javascript">
   $(function() {
     var s = io.connect();
     var source   = $("#results-template").html();
     var template = Handlebars.compile(source);
+    var teamSource = $("#teams-template").html();
+    var teamTemplate = Handlebars.compile(teamSource);
 
     s.on('connect', function() {
       s.on('message', function(m) {
@@ -50,6 +76,28 @@
       $.post('/_api', {action: 'reset'});
     });
 
+    $(document).on('click', '.delete-team', function() {
+      $.ajax({
+        url: '/_teams',
+	type: 'DELETE',
+	data: {name:$(this).attr('data-team-name')},
+	success: function(data) {
+          $('#teams').html(teamTemplate({teams: data}));
+        }
+      });
+    });
+
+    $.get('/_teams', function(data) {
+      $('#teams').html(teamTemplate({teams: data}));
+    });
+    
+    $('#new-team-btn').click(function() {
+      $.post('/_teams', {name: $('#new-team').val()}, function(data) {
+        $('#teams').html(teamTemplate({teams: data}));
+	$('#new-team').val("");
+      });
+    });
+
   });
   </script>
   <title>Poll Results</title>
@@ -63,5 +111,11 @@
   <h1></h1>
   <button id="toggle">Toggle Poll</button>
   <button id="reset">Reset Poll</button>
+  <h1></h1>
+  <h2>Teams</h2>
+  <input id="new-team" placeholder="Team Name" /> <input type="button" id="new-team-btn" value="Add Team" />
+  <div id="teams">
+
+  </div>
 </body>
 </html>
