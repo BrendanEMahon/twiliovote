@@ -45,7 +45,7 @@ app.get('/_teams', function(req, res){
 });
 
 app.post('/_teams', function(req, res){
-  client.saddAsync('teams', req.body.name).then(function(_) {
+  client.saddAsync('teams', req.body.name.toLowerCase()).then(function(_) {
     client.smembersAsync('teams').then(function(teams) {
       res.json(teams);
     });
